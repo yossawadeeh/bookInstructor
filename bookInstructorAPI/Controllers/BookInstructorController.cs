@@ -41,6 +41,49 @@ namespace bookInstructorAPI.Controllers
             }
 
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Booking(string instrutorCode, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var booking = await _bookInstructorService.Booking(instrutorCode, startDate, endDate);
+
+
+                if (booking == null)
+                {
+                    return StatusCode(404);
+                }
+
+                return Ok(booking);
+            }
+            catch (Exception)
+            {
+
+                return StatusCode(500);
+            }
+        }
+
+        [HttpGet("{instrutorCode}/{date}")]
+        public async Task<IActionResult> AvailableInstructor(string instrutorCode, DateTime date)
+        {
+            try
+            {
+                var res = await _bookInstructorService.AvailableInstructor(instrutorCode, date);
+
+                if (res == null)
+                {
+                    return NoContent();
+                }
+
+                return Ok(res);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
+
+        }
     }
 
 
