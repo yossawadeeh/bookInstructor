@@ -65,8 +65,7 @@ namespace bookInstructorAPI.Service
         public async Task<List<AvailableInstructorModel>> AvailableInstructor(string instrutorCode, DateTime date)
         {
             var avaList = new List<AvailableInstructorModel>();
-            var slot = new List<TimeSlotModel>();
-
+            
             var instructorsSlot = _context.TblInstructors
                 .Where(e => e.InstructorCode == instrutorCode)
                 .Select(e => new TblInstructor() { 
@@ -78,14 +77,16 @@ namespace bookInstructorAPI.Service
                     TimeEnd = e.TimeEnd
                 }).FirstOrDefault();
 
-            //string[] words = instructorsSlot.ActiveDay.Split(',').Select(Int32.Parse).ToArray();
-            string[] words = instructorsSlot.ActiveDay.Split(',');
+            string[] activeday = instructorsSlot.ActiveDay.Split('|');
+            int[] convertedActiveday = Array.ConvertAll<string, int>(activeday, int.Parse);
             int today = (int)date.DayOfWeek;
 
             int startTimeFix = (int)instructorsSlot.TimeStart.Value.Hours;
             int endTimeFix = (int)instructorsSlot.TimeEnd.Value.Hours;
             int startTime = (int)instructorsSlot.TimeStart.Value.Hours;
 
+            // loop for add timeslot by 1 hr period
+            var slot = new List<TimeSlotModel>(); // int
             for (var i= startTimeFix; i<= endTimeFix-1; i++)
             {
                     slot.Add(new TimeSlotModel()
@@ -96,31 +97,25 @@ namespace bookInstructorAPI.Service
                 startTime += 1;
             }
 
-            //if (words.Contains(today))
-            //{
-            //    avaList.Add(new AvailableInstructorModel()
-            //    {
-            //        InstrutorCode = instrutorCode,
-            //        Date = date,
-            //        TimeSlot = slot
-            //    });
-            //}
-            //else
-            //{
-            //    avaList.Add(new AvailableInstructorModel()
-            //    {
-            //        InstrutorCode = instrutorCode,
-            //        Date = date,
-            //        //TimeSlot = { }
-            //    });
-            //}
-
-            avaList.Add(new AvailableInstructorModel()
+            // check active day in today of instructor
+            if (convertedActiveday.Contains(today))
             {
-                InstrutorCode = instrutorCode,
-                Date = date,
-                TimeSlot = slot
-            });
+                avaList.Add(new AvailableInstructorModel()
+                {
+                    InstrutorCode = instrutorCode,
+                    Date = date,
+                    TimeSlot = slot
+                });
+            }
+            else
+            {
+                avaList.Add(new AvailableInstructorModel()
+                {
+                    InstrutorCode = instrutorCode,
+                    Date = date,
+                    TimeSlot = null
+                });
+            }
 
             return avaList;
         }
