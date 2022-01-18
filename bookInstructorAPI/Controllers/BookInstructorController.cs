@@ -1,4 +1,5 @@
-﻿using bookInstructorAPI.Service.Interface;
+﻿using bookInstructorAPI.DB;
+using bookInstructorAPI.Service.Interface;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -43,11 +44,11 @@ namespace bookInstructorAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Booking(string instrutorCode, DateTime startDate, DateTime endDate)
+        public async Task<IActionResult> Booking([FromBody] AddInstructorModel addInstructor)
         {
             try
             {
-                var booking = await _bookInstructorService.Booking(instrutorCode, startDate, endDate);
+                var booking = await _bookInstructorService.Booking(addInstructor);
 
 
                 if (booking == null)

@@ -33,18 +33,18 @@ namespace bookInstructorAPI.Service
             return res;
         }
 
-        public async Task<TblTransactionTimeSlot> Booking(string instrutorCode, DateTime date, DateTime startDate, DateTime endDate)
+        public async Task<TblTransactionTimeSlot> Booking(AddInstructorModel addInstructor)
         {
-            int bookStartH = startDate.Hour;
-            int bookEndH = endDate.Hour;
+            //int bookStartH = startDate.Hour;
+            //int bookEndH = endDate.Hour;
 
-            TimeSpan bookStart = new TimeSpan(bookStartH, 0, 0);
-            TimeSpan bookEnd = new TimeSpan(bookEndH, 0, 0);
+            TimeSpan bookStart = new TimeSpan(addInstructor.TimeStart, 0, 0);
+            TimeSpan bookEnd = new TimeSpan(addInstructor.TimeEnd, 0, 0);
 
             var book = new TblTransactionTimeSlot()
             {
-                InstrutorCode = instrutorCode,
-                CreateDate = date,
+                InstrutorCode = addInstructor.InstrutorCode,
+                CreateDate = addInstructor.CreateDate,
                 TimeStart = bookStart,
                 TimeEnd = bookEnd
             };
@@ -61,10 +61,8 @@ namespace bookInstructorAPI.Service
             return book;
         }
 
-        public async Task<List<AvailableInstructorModel>> AvailableInstructor(string instrutorCode, DateTime date)
+        public async Task<AvailableInstructorModel> AvailableInstructor(string instrutorCode, DateTime date)
         {
-            var avaList = new List<AvailableInstructorModel>();
-            
             var instructorsSlot = _context.TblInstructors
                 .Where(e => e.InstructorCode == instrutorCode)
                 .Select(e => new TblInstructor() { 
@@ -116,24 +114,25 @@ namespace bookInstructorAPI.Service
             slot.RemoveAll(r => bookedStart.Any(a => a == r.Start));
 
             // check active day in today of instructor
+            var avaList = new AvailableInstructorModel();
             if (convertedActiveday.Contains(today))
             {
-                avaList.Add(new AvailableInstructorModel()
+                avaList = new AvailableInstructorModel()
                 {
                     InstrutorCode = instrutorCode,
                     Date = date,
                     TimeSlot = slot
-                });
+                };
 
             }
             else
             {
-                avaList.Add(new AvailableInstructorModel()
+                avaList = new AvailableInstructorModel()
                 {
                     InstrutorCode = instrutorCode,
                     Date = date,
                     TimeSlot = null
-                });
+                };
             }
 
             return avaList;

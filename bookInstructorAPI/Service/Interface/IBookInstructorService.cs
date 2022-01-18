@@ -9,7 +9,7 @@ namespace bookInstructorAPI.Service.Interface
     public interface IBookInstructorService
     {
         public Task<List<TblInstructor>> SelectInstructor();
-        public Task<TblTransactionTimeSlot> Booking(string instrutorCode, DateTime date, DateTime startDate, DateTime endDate);
-        public Task<List<AvailableInstructorModel>> AvailableInstructor(string instrutorCode, DateTime date);
+        public Task<TblTransactionTimeSlot> Booking(AddInstructorModel addInstructor);
+        public Task<AvailableInstructorModel> AvailableInstructor(string instrutorCode, DateTime date);
     }
 }
