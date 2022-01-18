@@ -33,9 +33,8 @@ namespace bookInstructorAPI.Service
             return res;
         }
 
-        public async Task<TblTransactionTimeSlot> Booking(string instrutorCode, DateTime startDate, DateTime endDate)
+        public async Task<TblTransactionTimeSlot> Booking(string instrutorCode, DateTime date, DateTime startDate, DateTime endDate)
         {
-            DateTime createDate = DateTime.Now;
             int bookStartH = startDate.Hour;
             int bookEndH = endDate.Hour;
 
@@ -45,7 +44,7 @@ namespace bookInstructorAPI.Service
             var book = new TblTransactionTimeSlot()
             {
                 InstrutorCode = instrutorCode,
-                CreateDate = createDate,
+                CreateDate = date,
                 TimeStart = bookStart,
                 TimeEnd = bookEnd
             };
@@ -89,13 +88,32 @@ namespace bookInstructorAPI.Service
             var slot = new List<TimeSlotModel>(); // int
             for (var i= startTimeFix; i<= endTimeFix-1; i++)
             {
-                    slot.Add(new TimeSlotModel()
+                    slot
+                    .Add(new TimeSlotModel()
                 {
                     Start = startTime,
                     End = startTime+1,
                 });
                 startTime += 1;
             }
+
+            // filter booked
+            var booked = _context.TblTransactionTimeSlots
+                .Where(e => e.InstrutorCode == instrutorCode && date == e.CreateDate)
+                .Select(e => new
+                {
+                    Start = (int)e.TimeStart.Value.Hours,
+                    End = (int)e.TimeEnd.Value.Hours,
+                })
+                .ToList();
+
+            List<int> bookedStart = new List<int>();
+            foreach (var b in booked)
+            {
+                bookedStart.Add(b.Start);
+            }
+
+            slot.RemoveAll(r => bookedStart.Any(a => a == r.Start));
 
             // check active day in today of instructor
             if (convertedActiveday.Contains(today))
@@ -106,6 +124,7 @@ namespace bookInstructorAPI.Service
                     Date = date,
                     TimeSlot = slot
                 });
+
             }
             else
             {
